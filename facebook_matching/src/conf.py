@@ -7,7 +7,7 @@ sys.path.append("../configs")
 
 parser = argparse.ArgumentParser(description='')
 
-config_path = 'config8'
+config_path = 'config1'
 
 parser.add_argument("-C", "--config", help="config filename")
 parser_args, _ = parser.parse_known_args(sys.argv)

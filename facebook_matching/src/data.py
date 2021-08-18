@@ -145,10 +145,11 @@ class FBDataset(Dataset):
         self.df = df
         self.aug = aug
         self.normalization = normalization
-        self.labels = self.df.reference_id.values
+        # self.labels = self.df.reference_id.values
         self.img_folder = self.df.img_folder.values
         self.suffix = suffix
         self.image_names = self.df.query_id.values
+        self.targets = self.df.label.values
         self.images_cache = {}
         self.images_in_cache = False
 
@@ -160,6 +161,7 @@ class FBDataset(Dataset):
     def __getitem__(self, idx):
         id_ = self.image_names[idx]
         img_folder_ = self.img_folder[idx]
+        target = torch.tensor(self.targets[idx])
 
         if self.images_in_cache:
             img = self.images_cache[id_]
@@ -175,10 +177,9 @@ class FBDataset(Dataset):
 
         tensor = self.to_torch_tensor(img)
 
-        # target = torch.tensor(self.labels[idx])
         feature_dict = {'idx': torch.tensor(idx).long(),
                         'input': tensor,
-                        # 'target': target.float()
+                        'target': target
                         }
         return feature_dict
 
