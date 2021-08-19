@@ -11,7 +11,7 @@ from data import FBDataset
 from models import Net
 from loss import ArcFaceLoss
 
-is_dgx = False
+is_dgx = True
 
 if is_dgx:
     # Load dataset:
@@ -75,7 +75,6 @@ for epoch in range(num_epoch):
         optimizer.step()
 
         running_loss += loss.item()
-        break
     print('\nEpoch: %d loss: %.3f' %
           (epoch + 1, running_loss / (len(data_train))))
     torch.save(model.state_dict(), f'{args.backbone}_epoch{_epoch}.pth')
@@ -101,7 +100,6 @@ for epoch in range(num_epoch):
             # AUC:
             batch_preds.append(predicted.detach().cpu().numpy())
             batch_labels.append(targets.detach().cpu().numpy())
-            break
     predictions = np.concatenate(batch_preds)
     labels = np.concatenate(batch_labels)
     auc = roc_auc_score(y_true=labels, y_score=predictions, multi_class='ovo', average='macro')
