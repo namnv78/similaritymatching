@@ -11,22 +11,31 @@ from data import FBDataset
 from models import Net
 from loss import ArcFaceLoss
 
-is_dgx = True
+# is_dgx = True
+use_data_re_id = True
 
-if is_dgx:
-    # Load dataset:
-    df_train = pd.read_csv('train_truth_10k_dgx.csv')
+# if is_dgx:
+#     # Load dataset:
+#     df_train = pd.read_csv('train_truth_10k_dgx.csv')
+#     DEVICE = torch.device("cuda:3")
+#     batch_size = 12
+#     num_epoch = 20
+# else:
+#     # Load dataset:
+#     df_train = pd.read_csv('train_truth_10k.csv')
+#     DEVICE = torch.device("cpu")
+#     batch_size = 2
+#     num_epoch = 2
+
+if use_data_re_id:
     DEVICE = torch.device("cuda:3")
     batch_size = 12
     num_epoch = 20
-else:
-    # Load dataset:
-    df_train = pd.read_csv('train_truth_10k.csv')
-    DEVICE = torch.device("cpu")
-    batch_size = 2
-    num_epoch = 2
 
-
+    df_train = pd.read_csv('test_200.txt', header=None, delimiter=" ")
+    df_train.columns = ['img_folder', 'label']
+    df_train['query_id'] = df_train['img_folder'].apply(lambda x: x.split('/')[-1].replace(".jpg", ""))
+    df_train['img_folder'] = df_train['img_folder'].apply(lambda x: "/".join(x.split('/')[:-1]))
 
 data_train = FBDataset(df_train, normalization=args.normalization, aug=args.tr_aug)
 data_valid = FBDataset(df_train, normalization=args.normalization, aug=args.val_aug)
