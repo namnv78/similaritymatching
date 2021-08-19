@@ -3,8 +3,9 @@ import pandas as pd
 from tqdm import tqdm
 # import joblib
 from torch.optim import AdamW
+# from torch import nn
 
-from conf import *
+# from conf import *
 from utils import *
 from data import FBDataset
 from models import Net
@@ -74,6 +75,7 @@ for epoch in range(num_epoch):
         optimizer.step()
 
         running_loss += loss.item()
+        break
     print('\nEpoch: %d loss: %.3f' %
           (epoch + 1, running_loss / (len(data_train))))
     torch.save(model.state_dict(), f'{args.backbone}_epoch{_epoch}.pth')
@@ -82,6 +84,9 @@ for epoch in range(num_epoch):
     correct = 0
     total = 0
     with torch.no_grad():
+        batch_preds = []
+        batch_labels = []
+
         tk_valid = tqdm(enumerate(valid_loader), total=len(valid_loader))
         for i, batch in tk_valid:
             inputs = batch['input'].to(DEVICE)
@@ -93,5 +98,13 @@ for epoch in range(num_epoch):
             _, predicted = torch.max(outputs['logits'], 1)
             total += targets.size(0)
             correct += (predicted == targets).sum().item()
+            # AUC:
+            batch_preds.append(predicted.detach().cpu().numpy())
+            batch_labels.append(targets.detach().cpu().numpy())
+            break
+    predictions = np.concatenate(batch_preds)
+    labels = np.concatenate(batch_labels)
+    auc = roc_auc_score(y_true=labels, y_score=predictions, multi_class='ovo', average='macro')
 
-    print('\nAccuracy of valid images: %d %%' % (100 * correct / total))
+    print('\nPrecission of valid images: %d %%' % (correct / total))
+    print(f'AUC of valid images:{auc}')
