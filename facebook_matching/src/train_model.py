@@ -11,7 +11,7 @@ from data import FBDataset
 from models import Net
 from loss import ArcFaceLoss
 
-# is_dgx = True
+is_dgx = False
 use_data_re_id = True
 
 # if is_dgx:
@@ -32,16 +32,30 @@ if use_data_re_id:
     batch_size = 12
     num_epoch = 20
 
-    df_train = pd.read_csv('test_200.txt', header=None, delimiter=" ")
+    df_train = pd.read_csv('train_1K.txt', header=None, delimiter=" ")
+    df_valid = pd.read_csv('val_200.txt', header=None, delimiter=" ")
+    df_test = pd.read_csv('test_200.txt', header=None, delimiter=" ")
+
     df_train.columns = ['img_folder', 'label']
     df_train['query_id'] = df_train['img_folder'].apply(lambda x: x.split('/')[-1].replace(".jpg", ""))
     df_train['img_folder'] = df_train['img_folder'].apply(lambda x: "/".join(x.split('/')[:-1]))
 
+    df_valid.columns = ['img_folder', 'label']
+    df_valid['query_id'] = df_valid['img_folder'].apply(lambda x: x.split('/')[-1].replace(".jpg", ""))
+    df_valid['img_folder'] = df_valid['img_folder'].apply(lambda x: "/".join(x.split('/')[:-1]))
+
+    df_test.columns = ['img_folder', 'label']
+    df_test['query_id'] = df_test['img_folder'].apply(lambda x: x.split('/')[-1].replace(".jpg", ""))
+    df_test['img_folder'] = df_test['img_folder'].apply(lambda x: "/".join(x.split('/')[:-1]))
+
 data_train = FBDataset(df_train, normalization=args.normalization, aug=args.tr_aug)
-data_valid = FBDataset(df_train, normalization=args.normalization, aug=args.val_aug)
+data_valid = FBDataset(df_valid, normalization=args.normalization, aug=args.val_aug)
+data_test = FBDataset(df_test, normalization=args.normalization, aug=args.val_aug)
 
 train_loader = torch.utils.data.DataLoader(data_train, batch_size=batch_size, shuffle=True)
-valid_loader = torch.utils.data.DataLoader(data_train, batch_size=batch_size, shuffle=False)
+valid_loader = torch.utils.data.DataLoader(data_valid, batch_size=batch_size, shuffle=False)
+test_loader = torch.utils.data.DataLoader(data_test, batch_size=batch_size, shuffle=False)
+
 
 args.n_classes = df_train['label'].nunique()
 # Training model:
