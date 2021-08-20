@@ -28,6 +28,9 @@ use_data_re_id = True
 #     num_epoch = 2
 
 if use_data_re_id:
+    # Config image folder
+    root_image_folder = ""
+
     DEVICE = torch.device("cuda:3")
     batch_size = 12
     num_epoch = 20
@@ -38,15 +41,15 @@ if use_data_re_id:
 
     df_train.columns = ['img_folder', 'label']
     df_train['query_id'] = df_train['img_folder'].apply(lambda x: x.split('/')[-1].replace(".jpg", ""))
-    df_train['img_folder'] = df_train['img_folder'].apply(lambda x: "/".join(x.split('/')[:-1]))
+    df_train['img_folder'] = df_train['img_folder'].apply(lambda x: root_image_folder + "/" + "/".join(x.split('/')[:-1]))
 
     df_valid.columns = ['img_folder', 'label']
     df_valid['query_id'] = df_valid['img_folder'].apply(lambda x: x.split('/')[-1].replace(".jpg", ""))
-    df_valid['img_folder'] = df_valid['img_folder'].apply(lambda x: "/".join(x.split('/')[:-1]))
+    df_valid['img_folder'] = df_valid['img_folder'].apply(lambda x: root_image_folder + "/" + "/".join(x.split('/')[:-1]))
 
     df_test.columns = ['img_folder', 'label']
     df_test['query_id'] = df_test['img_folder'].apply(lambda x: x.split('/')[-1].replace(".jpg", ""))
-    df_test['img_folder'] = df_test['img_folder'].apply(lambda x: "/".join(x.split('/')[:-1]))
+    df_test['img_folder'] = df_test['img_folder'].apply(lambda x: root_image_folder + "/" + "/".join(x.split('/')[:-1]))
 
 data_train = FBDataset(df_train, normalization=args.normalization, aug=args.tr_aug)
 data_valid = FBDataset(df_valid, normalization=args.normalization, aug=args.val_aug)
